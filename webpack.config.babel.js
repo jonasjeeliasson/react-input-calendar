@@ -215,7 +215,8 @@ const distCommon = {
         commonjs2: 'react',
         amd: 'react',
         root: 'React'
-    }
+    },
+    'moment': 'moment'
   },
   module: {
     loaders: [
