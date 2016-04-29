@@ -28,6 +28,7 @@ const Calendar = React.createClass({
     minView: React.PropTypes.number,
     onBlur: React.PropTypes.func,
     onChange: React.PropTypes.func,
+    onChangeAndBlur: React.PropTypes.func,
     openOnInputFocus: React.PropTypes.bool,
     placeholder: React.PropTypes.string,
     hideTouchKeyboard: React.PropTypes.bool,
@@ -93,18 +94,22 @@ const Calendar = React.createClass({
   setDate(date, isDayView) {
     if (this.checkIfDateDisabled(date)) return
 
+    const calendarClosed = this.props.closeOnSelect && isDayView
+
     this.setState({
       date,
       inputValue: date.format(this.state.format),
-      isVisible: this.props.closeOnSelect
-        && isDayView ? !this.state.isVisible : this.state.isVisible
+      isVisible: calendarClosed ? !this.state.isVisible : this.state.isVisible
     })
 
-    if (this.props.onChange) {
+    if (calendarClosed && this.props.onChangeAndBlur) {
+      this.props.onChangeAndBlur(date.format(this.state.computableFormat))
+    } else if (this.props.onChange) {
       this.props.onChange(date.format(this.state.computableFormat))
     }
   },
-
+  
+  
   checkIfDateDisabled(date) {
     return date && this.state.minDate && date.isBefore(this.state.minDate, 'day')
       || date && this.state.maxDate && date.isAfter(this.state.maxDate, 'day')
