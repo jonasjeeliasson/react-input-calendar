@@ -6,83 +6,70 @@ import 'moment-range'
 import Cell from './cell'
 import ViewHeader from './view-header'
 
+export default class MonthView extends React.Component {
+  propTypes = {
+    date: React.PropTypes.object.isRequired,
+    minDate: React.PropTypes.any,
+    maxDate: React.PropTypes.any
+  }
 
-module.exports = React.createClass({
+  checkIfMonthDisabled(month) {
+    const now = this.props.date
+    return now.clone().month(month).endOf('month').isBefore(this.props.minDate, 'day') ||
+      now.clone().month(month).startOf('month').isAfter(this.props.maxDate, 'day')
+  }
 
-    propTypes: {
-        date: React.PropTypes.object.isRequired,
-        minDate: React.PropTypes.any,
-        maxDate: React.PropTypes.any
-    },
-
-    checkIfMonthDisabled: function (month) {
-        let now = this.props.date
-
-        return now.clone().month(month).endOf('month').isBefore(this.props.minDate, 'day') ||
-            now.clone().month(month).startOf('month').isAfter(this.props.maxDate, 'day')
-    },
-
-    next: function() {
-        let nextDate = this.props.date.clone().add(1, 'years')
-
-        if (this.props.maxDate && nextDate.isAfter(this.props.maxDate, 'day')) {
-            nextDate = this.props.maxDate
-        }
-
-        this.props.setDate(nextDate)
-    },
-
-    prev: function() {
-        let prevDate = this.props.date.clone().subtract(1, 'years')
-
-        if (this.props.minDate && prevDate.isBefore(this.props.minDate, 'day')) {
-            prevDate = this.props.minDate
-        }
-
-        this.props.setDate(prevDate)
-    },
-
-    cellClick: function (e) {
-        let month = e.target.innerHTML,
-          date = this.props.date.clone().month(month)
-
-        if (this.checkIfMonthDisabled(month)) {
-          return
-        }
-
-        this.props.prevView(date)
-    },
-
-    getMonth: function () {
-        let now = this.props.date,
-            month = now.month()
-
-        return moment.monthsShort().map(function (item, i) {
-            return {
-                label: item,
-                disabled: this.checkIfMonthDisabled(i),
-                curr: i === month
-            }
-        }.bind(this))
-    },
-
-    render: function () {
-        let currentDate = this.props.date.format('YYYY'), _class
-        let months = this.getMonth().map(function (item, i) {
-            _class = cs({
-                'month': true,
-                'disabled': item.disabled,
-                'current': item.curr
-            })
-            return <Cell classes={_class} key={i} value={item.label} />
-        })
-
-        return (
-            <div className="months-view" >
-                <ViewHeader data={currentDate} next={this.next} prev={this.prev} titleAction={this.props.nextView} />
-                <div className="months" onClick={this.cellClick}>{months}</div>
-            </div>
-        )
+  next = () => {
+    let nextDate = this.props.date.clone().add(1, 'years')
+    if (this.props.maxDate && nextDate.isAfter(this.props.maxDate, 'day')) {
+      nextDate = this.props.maxDate
     }
+    this.props.setDate(nextDate)
+  }
 
-})
+  prev = () => {
+    let prevDate = this.props.date.clone().subtract(1, 'years')
+    if (this.props.minDate && prevDate.isBefore(this.props.minDate, 'day')) {
+      prevDate = this.props.minDate
+    }
+    this.props.setDate(prevDate)
+  }
+
+  cellClick = e => {
+    const month = e.target.innerHTML
+    if (this.checkIfMonthDisabled(month)) return
+
+    const date = this.props.date.clone().month(month)
+    this.props.prevView(date)
+  }
+
+  getMonth() {
+    const month = this.props.date.month()
+    return moment.monthsShort().map((item, i) => {
+      return {
+        label: item,
+        disabled: this.checkIfMonthDisabled(i),
+        curr: i === month
+      }
+    })
+  }
+
+  render() {
+    const currentDate = this.props.date.format('YYYY')
+    let months = this.getMonth().map((item, i) => {
+      let _class = cs({
+        'month': true,
+        'disabled': item.disabled,
+        'current': item.curr
+      })
+      return <Cell classes={_class} key={i} value={item.label} />
+    })
+
+    return (
+      <div className="months-view" >
+        <ViewHeader data={currentDate} next={this.next} prev={this.prev} titleAction={this.props.nextView} />
+        <div className="months" onClick={this.cellClick}>{months}</div>
+      </div>
+    )
+  }
+}
