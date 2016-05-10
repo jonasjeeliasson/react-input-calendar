@@ -150,9 +150,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 	
 	  componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
+	    var date = nextProps.date ? (0, _moment2['default'])(_util2['default'].toDate(nextProps.date)) : null;
+	    var inputValue = date && date.isValid() ? date.format(this.state.format) : nextProps.date;
 	    this.setState({
-	      date: nextProps.date ? (0, _moment2['default'])(_util2['default'].toDate(nextProps.date)) : this.state.date,
-	      inputValue: nextProps.date ? (0, _moment2['default'])(_util2['default'].toDate(nextProps.date)).format(this.state.format) : null
+	      date: date ? date : this.state.date,
+	      inputValue: date ? inputValue : null
 	    });
 	  },
 	
@@ -309,7 +311,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // its ok for this.state.date to be null, but we should never
 	    // pass null for the date into the calendar pop up, as we want
 	    // it to just start on todays date if there is no date set
-	    var calendarDate = this.state.date || (0, _moment2['default'])();
+	    var calendarDate = this.state.date && this.state.date.isValid() ? this.state.date : (0, _moment2['default'])();
 	    var view = undefined;
 	
 	    switch (this.state.currentView) {
@@ -950,6 +952,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    _get(Object.getPrototypeOf(DayView.prototype), 'constructor', this).apply(this, arguments);
 	
+	    this.cellClick = function (e) {
+	      var cell = e.target;
+	      var date = parseInt(cell.innerHTML, 10);
+	      var newDate = _this.props.date ? _this.props.date.clone() : (0, _moment2['default'])();
+	
+	      if (isNaN(date)) return;
+	
+	      if (cell.className.indexOf('prev') > -1) {
+	        newDate.subtract(1, 'months');
+	      } else if (cell.className.indexOf('next') > -1) {
+	        newDate.add(1, 'months');
+	      }
+	
+	      newDate.date(date);
+	      _this.props.setDate(newDate, true);
+	    };
+	
 	    this.next = function () {
 	      var nextDate = _this.props.date.clone().add(1, 'months');
 	      if (_this.props.maxDate && nextDate.isAfter(_this.props.maxDate, 'day')) {
@@ -965,47 +984,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	      _this.props.setDate(prevDate);
 	    };
-	
-	    this.cellClick = function (e) {
-	      var cell = e.target,
-	          date = parseInt(cell.innerHTML, 10),
-	          newDate = _this.props.date ? _this.props.date.clone() : (0, _moment2['default'])();
-	
-	      if (isNaN(date)) return;
-	
-	      if (cell.className.indexOf('prev') > -1) {
-	        newDate.subtract(1, 'months');
-	      } else if (cell.className.indexOf('next') > -1) {
-	        newDate.add(1, 'months');
-	      }
-	
-	      newDate.date(date);
-	      _this.props.setDate(newDate, true);
-	    };
 	  }
 	
 	  _createClass(DayView, [{
-	    key: 'getDaysTitles',
-	    value: function getDaysTitles() {
-	      var now = (0, _moment2['default'])();
-	      return [0, 1, 2, 3, 4, 5, 6].map(function (i) {
-	        var weekday = now.weekday(i).format('dd');
-	        return { val: weekday, label: weekday };
-	      });
-	    }
-	  }, {
 	    key: 'getDays',
 	    value: function getDays() {
-	      var now = this.props.date ? this.props.date : (0, _moment2['default'])(),
-	          start = now.clone().startOf('month').weekday(0),
-	          end = now.clone().endOf('month').weekday(6),
-	          minDate = this.props.minDate,
-	          maxDate = this.props.maxDate,
-	          month = now.month(),
-	          today = (0, _moment2['default'])(),
-	          currDay = now.date(),
-	          year = now.year(),
-	          days = [];
+	      var now = this.props.date ? this.props.date : (0, _moment2['default'])();
+	      var start = now.clone().startOf('month').weekday(0);
+	      var end = now.clone().endOf('month').weekday(6);
+	      var minDate = this.props.minDate;
+	      var maxDate = this.props.maxDate;
+	      var month = now.month();
+	      var today = (0, _moment2['default'])();
+	      var currDay = now.date();
+	      var year = now.year();
+	      var days = [];
 	
 	      (0, _moment2['default'])().range(start, end).by('days', function (day) {
 	        days.push({
@@ -1020,21 +1013,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return days;
 	    }
 	  }, {
+	    key: 'getDaysTitles',
+	    value: function getDaysTitles() {
+	      var now = (0, _moment2['default'])();
+	      return [0, 1, 2, 3, 4, 5, 6].map(function (i) {
+	        var weekday = now.weekday(i).format('dd');
+	        return { val: weekday, label: weekday };
+	      });
+	    }
+	  }, {
 	    key: 'render',
 	    value: function render() {
 	      var titles = this.getDaysTitles().map(function (item, i) {
 	        return _react2['default'].createElement(_cell2['default'], { classes: 'day title', key: i, value: item.label });
-	      }),
-	          _class = undefined;
+	      });
+	      var _class = undefined;
 	
 	      var days = this.getDays().map(function (item, i) {
 	        _class = (0, _classnames2['default'])({
-	          'day': true,
-	          'next': item.next,
-	          'prev': item.prev,
-	          'disabled': item.disabled,
-	          'current': item.curr,
-	          'today': item.today
+	          day: true,
+	          next: item.next,
+	          prev: item.prev,
+	          disabled: item.disabled,
+	          current: item.curr,
+	          today: item.today
 	        });
 	        return _react2['default'].createElement(_cell2['default'], { classes: _class, key: i, value: item.label });
 	      });
@@ -1088,59 +1090,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, '__esModule', {
 	  value: true
 	});
-	
-	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-	
-	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+	exports['default'] = Cell;
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
-	
-	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
 	var _react = __webpack_require__(1);
 	
 	var _react2 = _interopRequireDefault(_react);
 	
-	var _moment = __webpack_require__(3);
-	
-	var _moment2 = _interopRequireDefault(_moment);
-	
 	__webpack_require__(4);
 	
-	var Cell = (function (_React$Component) {
-	  _inherits(Cell, _React$Component);
+	function Cell(_ref) {
+	  var value = _ref.value;
+	  var classes = _ref.classes;
 	
-	  function Cell() {
-	    _classCallCheck(this, Cell);
+	  var _classes = classes + ' cell';
+	  return _react2['default'].createElement(
+	    'div',
+	    { className: _classes },
+	    value
+	  );
+	}
 	
-	    _get(Object.getPrototypeOf(Cell.prototype), 'constructor', this).apply(this, arguments);
-	  }
-	
-	  _createClass(Cell, [{
-	    key: 'render',
-	    value: function render() {
-	      var classes = this.props.classes + ' cell';
-	      return _react2['default'].createElement(
-	        'div',
-	        { className: classes },
-	        this.props.value
-	      );
-	    }
-	  }], [{
-	    key: 'propTypes',
-	    value: {
-	      value: _react2['default'].PropTypes.string,
-	      classes: _react2['default'].PropTypes.string
-	    },
-	    enumerable: true
-	  }]);
-	
-	  return Cell;
-	})(_react2['default'].Component);
-	
-	exports['default'] = Cell;
 	module.exports = exports['default'];
 
 /***/ },
@@ -1152,69 +1123,41 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	
-	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-	
-	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+	exports["default"] = ViewHeader;
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
 	var _react = __webpack_require__(1);
 	
 	var _react2 = _interopRequireDefault(_react);
 	
-	var ViewHeader = (function (_React$Component) {
-	  _inherits(ViewHeader, _React$Component);
+	function ViewHeader(_ref) {
+	  var prev = _ref.prev;
+	  var next = _ref.next;
+	  var titleAction = _ref.titleAction;
+	  var data = _ref.data;
 	
-	  function ViewHeader() {
-	    _classCallCheck(this, ViewHeader);
+	  return _react2["default"].createElement(
+	    "div",
+	    { className: "navigation-wrapper" },
+	    _react2["default"].createElement(
+	      "span",
+	      { className: "icon", onClick: prev },
+	      "<"
+	    ),
+	    _react2["default"].createElement(
+	      "span",
+	      { className: "navigation-title", onClick: titleAction },
+	      data
+	    ),
+	    _react2["default"].createElement(
+	      "span",
+	      { className: "icon", onClick: next },
+	      ">"
+	    )
+	  );
+	}
 	
-	    _get(Object.getPrototypeOf(ViewHeader.prototype), "constructor", this).apply(this, arguments);
-	  }
-	
-	  _createClass(ViewHeader, [{
-	    key: "render",
-	    value: function render() {
-	      var prop = this.props;
-	      return _react2["default"].createElement(
-	        "div",
-	        { className: "navigation-wrapper" },
-	        _react2["default"].createElement(
-	          "span",
-	          { className: "icon", onClick: prop.prev },
-	          "<"
-	        ),
-	        _react2["default"].createElement(
-	          "span",
-	          { className: "navigation-title", onClick: prop.titleAction },
-	          prop.data
-	        ),
-	        _react2["default"].createElement(
-	          "span",
-	          { className: "icon", onClick: prop.next },
-	          ">"
-	        )
-	      );
-	    }
-	  }], [{
-	    key: "propTypes",
-	    value: {
-	      next: _react2["default"].PropTypes.func,
-	      prev: _react2["default"].PropTypes.func,
-	      titleAction: _react2["default"].PropTypes.func,
-	      data: _react2["default"].PropTypes.string
-	    },
-	    enumerable: true
-	  }]);
-	
-	  return ViewHeader;
-	})(_react2["default"].Component);
-	
-	exports["default"] = ViewHeader;
 	module.exports = exports["default"];
 
 /***/ },
@@ -1269,10 +1212,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    _get(Object.getPrototypeOf(MonthView.prototype), 'constructor', this).apply(this, arguments);
 	
-	    this.propTypes = {
-	      date: _react2['default'].PropTypes.object.isRequired,
-	      minDate: _react2['default'].PropTypes.any,
-	      maxDate: _react2['default'].PropTypes.any
+	    this.cellClick = function (e) {
+	      var month = e.target.innerHTML;
+	      if (_this.checkIfMonthDisabled(month)) return;
+	
+	      var date = _this.props.date.clone().month(month);
+	      _this.props.prevView(date);
 	    };
 	
 	    this.next = function () {
@@ -1289,14 +1234,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        prevDate = _this.props.minDate;
 	      }
 	      _this.props.setDate(prevDate);
-	    };
-	
-	    this.cellClick = function (e) {
-	      var month = e.target.innerHTML;
-	      if (_this.checkIfMonthDisabled(month)) return;
-	
-	      var date = _this.props.date.clone().month(month);
-	      _this.props.prevView(date);
 	    };
 	  }
 	
@@ -1326,9 +1263,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var currentDate = this.props.date.format('YYYY');
 	      var months = this.getMonth().map(function (item, i) {
 	        var _class = (0, _classnames2['default'])({
-	          'month': true,
-	          'disabled': item.disabled,
-	          'current': item.curr
+	          month: true,
+	          disabled: item.disabled,
+	          current: item.curr
 	        });
 	        return _react2['default'].createElement(_cell2['default'], { classes: _class, key: i, value: item.label });
 	      });
@@ -1344,6 +1281,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	        )
 	      );
 	    }
+	  }], [{
+	    key: 'propTypes',
+	    value: {
+	      date: _react2['default'].PropTypes.object.isRequired,
+	      minDate: _react2['default'].PropTypes.any,
+	      maxDate: _react2['default'].PropTypes.any
+	    },
+	    enumerable: true
 	  }]);
 	
 	  return MonthView;
@@ -1404,8 +1349,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    _get(Object.getPrototypeOf(YearsView.prototype), 'constructor', this).apply(this, arguments);
 	
-	    this.state = {
-	      years: []
+	    this.state = { years: [] };
+	
+	    this.cellClick = function (e) {
+	      var year = parseInt(e.target.innerHTML, 10);
+	      var date = _this.props.date.clone().year(year);
+	      if (_this.checkIfYearDisabled(date)) return;
+	      _this.props.prevView(date);
 	    };
 	
 	    this.next = function () {
@@ -1432,16 +1382,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	      return years[0].label <= currYear && years[years.length - 1].label >= currYear;
 	    };
-	
-	    this.cellClick = function (e) {
-	      var year = parseInt(e.target.innerHTML, 10);
-	      var date = _this.props.date.clone().year(year);
-	      if (_this.checkIfYearDisabled(date)) return;
-	      _this.props.prevView(date);
-	    };
 	  }
 	
 	  _createClass(YearsView, [{
+	    key: 'componentWillMount',
+	    value: function componentWillMount() {
+	      this.getYears();
+	    }
+	  }, {
+	    key: 'componentWillReceiveProps',
+	    value: function componentWillReceiveProps() {
+	      this.getYears();
+	    }
+	  }, {
 	    key: 'checkIfYearDisabled',
 	    value: function checkIfYearDisabled(year) {
 	      return year.clone().endOf('year').isBefore(this.props.minDate, 'day') || year.clone().startOf('year').isAfter(this.props.maxDate, 'day');
@@ -1451,12 +1404,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function getYears() {
 	      var _this2 = this;
 	
-	      var now = this.props.date,
-	          start = now.clone().subtract(5, 'year'),
-	          end = now.clone().add(6, 'year'),
-	          currYear = now.year(),
-	          items = [],
-	          inRange = this.rangeCheck(currYear);
+	      var now = this.props.date;
+	      var start = now.clone().subtract(5, 'year');
+	      var end = now.clone().add(6, 'year');
+	      var currYear = now.year();
+	      var items = [];
+	      var inRange = this.rangeCheck(currYear);
 	
 	      var years = this.state.years;
 	
@@ -1479,15 +1432,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'render',
 	    value: function render() {
-	      var years = this.getYears();
+	      var years = this.state.years;
 	      var currYear = this.props.date.year();
 	      var _class = undefined;
 	
 	      var yearsCells = years.map(function (item, i) {
 	        _class = (0, _classnames2['default'])({
-	          'year': true,
-	          'disabled': item.disabled,
-	          'current': item.label == currYear
+	          year: true,
+	          disabled: item.disabled,
+	          current: item.label == currYear
 	        });
 	        return _react2['default'].createElement(_cell2['default'], { value: item.label, classes: _class, key: i });
 	      });

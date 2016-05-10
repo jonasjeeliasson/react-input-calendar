@@ -69,10 +69,11 @@ const Calendar = React.createClass({
   },
 
   componentWillReceiveProps(nextProps) {
+    const date = nextProps.date ? moment(Util.toDate(nextProps.date)) : null
+    const inputValue = date && date.isValid() ? date.format(this.state.format) : nextProps.date
     this.setState({
-      date: nextProps.date ? moment(Util.toDate(nextProps.date)) : this.state.date,
-      inputValue: nextProps.date
-        ? moment(Util.toDate(nextProps.date)).format(this.state.format) : null
+      date: date ? date : this.state.date,
+      inputValue: date ? inputValue : null
     })
   },
 
@@ -108,8 +109,7 @@ const Calendar = React.createClass({
       this.props.onChange(date.format(this.state.computableFormat))
     }
   },
-  
-  
+
   checkIfDateDisabled(date) {
     return date && this.state.minDate && date.isBefore(this.state.minDate, 'day')
       || date && this.state.maxDate && date.isAfter(this.state.maxDate, 'day')
@@ -232,7 +232,7 @@ const Calendar = React.createClass({
     // its ok for this.state.date to be null, but we should never
     // pass null for the date into the calendar pop up, as we want
     // it to just start on todays date if there is no date set
-    let calendarDate = this.state.date || moment()
+    let calendarDate = this.state.date && this.state.date.isValid() ? this.state.date : moment()
     let view
 
     switch (this.state.currentView) {
