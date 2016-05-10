@@ -60,7 +60,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 	
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+	
+	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
 	var _react = __webpack_require__(1);
 	
@@ -92,44 +100,155 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _util2 = _interopRequireDefault(_util);
 	
-	var Calendar = _react2['default'].createClass({
-	  displayName: 'Calendar',
+	var Calendar = (function (_React$Component) {
+	  _inherits(Calendar, _React$Component);
 	
-	  propTypes: {
-	    closeOnSelect: _react2['default'].PropTypes.bool,
-	    computableFormat: _react2['default'].PropTypes.string,
-	    strictDateParsing: _react2['default'].PropTypes.bool,
-	    parsingFormat: _react2['default'].PropTypes.oneOfType([_react2['default'].PropTypes.string, _react2['default'].PropTypes.arrayOf(_react2['default'].PropTypes.string)]),
-	    date: _react2['default'].PropTypes.any,
-	    minDate: _react2['default'].PropTypes.any,
-	    maxDate: _react2['default'].PropTypes.any,
-	    format: _react2['default'].PropTypes.string,
-	    inputName: _react2['default'].PropTypes.string,
-	    inputFieldId: _react2['default'].PropTypes.string,
-	    inputFieldClass: _react2['default'].PropTypes.string,
-	    minView: _react2['default'].PropTypes.number,
-	    onBlur: _react2['default'].PropTypes.func,
-	    onChange: _react2['default'].PropTypes.func,
-	    onChangeAndBlur: _react2['default'].PropTypes.func,
-	    openOnInputFocus: _react2['default'].PropTypes.bool,
-	    placeholder: _react2['default'].PropTypes.string,
-	    hideTouchKeyboard: _react2['default'].PropTypes.bool,
-	    hideIcon: _react2['default'].PropTypes.bool,
-	    customIcon: _react2['default'].PropTypes.string,
-	    todayText: _react2['default'].PropTypes.string
-	  },
+	  function Calendar(props, context) {
+	    var _this = this;
 	
-	  getInitialState: function getInitialState() {
-	    var date = this.props.date ? (0, _moment2['default'])(_util2['default'].toDate(this.props.date)) : null;
-	    var minDate = this.props.minDate ? (0, _moment2['default'])(_util2['default'].toDate(this.props.minDate)) : null;
-	    var maxDate = this.props.maxDate ? (0, _moment2['default'])(_util2['default'].toDate(this.props.maxDate)) : null;
-	    var format = this.props.format || 'MM-DD-YYYY';
-	    var minView = parseInt(this.props.minView, 10) || 0;
-	    var computableFormat = this.props.computableFormat || 'MM-DD-YYYY';
-	    var strictDateParsing = this.props.strictDateParsing || false;
-	    var parsingFormat = this.props.parsingFormat || format;
+	    _classCallCheck(this, Calendar);
 	
-	    return {
+	    _get(Object.getPrototypeOf(Calendar.prototype), 'constructor', this).call(this, props, context);
+	
+	    this.changeDate = function (e) {
+	      //eslint-disable-line
+	      _this.setState({ inputValue: e.target.value });
+	    };
+	
+	    this.documentClick = function () {
+	      if (!_this.state.isCalendar) {
+	        _this.setVisibility(false);
+	      }
+	      _this.setState({ isCalendar: false });
+	    };
+	
+	    this.inputBlur = function (e) {
+	      var newDate = null;
+	      var computableDate = null;
+	      var date = _this.state.inputValue;
+	      var format = _this.state.format;
+	      var parsingFormat = _this.state.parsingFormat;
+	
+	      if (date) {
+	        // format, with strict parsing true, so we catch bad dates
+	        newDate = (0, _moment2['default'])(date, parsingFormat, true);
+	        // if the new date didn't match our format, see if the native
+	        // js date can parse it
+	        if (!newDate.isValid() && !_this.props.strictDateParsing) {
+	          var d = new Date(date);
+	          // if native js cannot parse, just make a new date
+	          if (isNaN(d.getTime())) {
+	            d = new Date();
+	          }
+	          newDate = (0, _moment2['default'])(d);
+	        }
+	
+	        computableDate = newDate.format(_this.state.computableFormat);
+	      }
+	
+	      _this.setState({
+	        date: newDate,
+	        inputValue: newDate ? newDate.format(format) : null
+	      });
+	
+	      if (_this.props.onChange) {
+	        _this.props.onChange(computableDate);
+	      }
+	
+	      if (_this.props.onBlur) {
+	        _this.props.onBlur(e, computableDate);
+	      }
+	    };
+	
+	    this.keyDown = function (e) {
+	      _util2['default'].keyDownActions.call(_this, e.keyCode);
+	    };
+	
+	    this.nextView = function () {
+	      if (_this.checkIfDateDisabled(_this.state.date)) return;
+	      _this.setState({ currentView: ++_this.state.currentView });
+	    };
+	
+	    this.prevView = function (date) {
+	      var newDate = date;
+	      if (_this.state.minDate && date.isBefore(_this.state.minDate, 'day')) {
+	        newDate = _this.state.minDate.clone();
+	      }
+	
+	      if (_this.state.maxDate && date.isAfter(_this.state.maxDate, 'day')) {
+	        newDate = _this.state.maxDate.clone();
+	      }
+	
+	      if (_this.state.currentView === _this.state.minView) {
+	        _this.setState({
+	          date: newDate,
+	          inputValue: date.format(_this.state.format),
+	          isVisible: false
+	        });
+	        if (_this.props.onChange) {
+	          _this.props.onChange(date.format(_this.state.computableFormat));
+	        }
+	      } else {
+	        _this.setState({
+	          date: date,
+	          currentView: --_this.state.currentView
+	        });
+	      }
+	    };
+	
+	    this.setDate = function (date, isDayView) {
+	      if (_this.checkIfDateDisabled(date)) return;
+	
+	      var calendarClosed = _this.props.closeOnSelect && isDayView;
+	
+	      _this.setState({
+	        date: date,
+	        inputValue: date.format(_this.state.format),
+	        isVisible: calendarClosed ? !_this.state.isVisible : _this.state.isVisible
+	      });
+	
+	      if (calendarClosed && _this.props.onChangeAndBlur) {
+	        _this.props.onChangeAndBlur(date.format(_this.state.computableFormat));
+	      } else if (_this.props.onChange) {
+	        _this.props.onChange(date.format(_this.state.computableFormat));
+	      }
+	    };
+	
+	    this.calendarClick = function () {
+	      _this.setState({ isCalendar: true });
+	    };
+	
+	    this.todayClick = function () {
+	      var today = (0, _moment2['default'])().startOf('day');
+	
+	      if (_this.checkIfDateDisabled(today)) return;
+	
+	      _this.setState({
+	        date: today,
+	        inputValue: today.format(_this.state.format),
+	        currentView: _this.state.minView
+	      });
+	
+	      if (_this.props.onChange) {
+	        _this.props.onChange(today.format(_this.state.computableFormat));
+	      }
+	    };
+	
+	    this.toggleClick = function () {
+	      _this.setState({ isCalendar: true });
+	      _this.setVisibility();
+	    };
+	
+	    var date = props.date ? (0, _moment2['default'])(_util2['default'].toDate(props.date)) : null;
+	    var minDate = props.minDate ? (0, _moment2['default'])(_util2['default'].toDate(props.minDate)) : null;
+	    var maxDate = props.maxDate ? (0, _moment2['default'])(_util2['default'].toDate(props.maxDate)) : null;
+	    var format = props.format || 'MM-DD-YYYY';
+	    var minView = parseInt(props.minView, 10) || 0;
+	    var computableFormat = props.computableFormat || 'MM-DD-YYYY';
+	    var strictDateParsing = props.strictDateParsing || false;
+	    var parsingFormat = props.parsingFormat || format;
+	
+	    this.state = {
 	      date: date,
 	      minDate: minDate,
 	      maxDate: maxDate,
@@ -143,289 +262,197 @@ return /******/ (function(modules) { // webpackBootstrap
 	      strictDateParsing: strictDateParsing,
 	      parsingFormat: parsingFormat
 	    };
-	  },
+	  }
 	
-	  componentDidMount: function componentDidMount() {
-	    document.addEventListener('click', this.documentClick);
-	  },
-	
-	  componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
-	    var date = nextProps.date ? (0, _moment2['default'])(_util2['default'].toDate(nextProps.date)) : null;
-	    var inputValue = date && date.isValid() ? date.format(this.state.format) : nextProps.date;
-	    this.setState({
-	      date: date ? date : this.state.date,
-	      inputValue: date ? inputValue : null
-	    });
-	  },
-	
-	  componentWillUnmount: function componentWillUnmount() {
-	    document.removeEventListener('click', this.documentClick);
-	  },
-	
-	  setVisibility: function setVisibility(val) {
-	    var value = val !== undefined ? val : !this.state.isVisible;
-	    var eventMethod = value ? 'addEventListener' : 'removeEventListener';
-	
-	    document[eventMethod]('keydown', this.keyDown);
-	
-	    if (this.state.isVisible !== value) {
-	      this.setState({ isVisible: value });
+	  _createClass(Calendar, [{
+	    key: 'componentDidMount',
+	    value: function componentDidMount() {
+	      document.addEventListener('click', this.documentClick);
 	    }
-	  },
+	  }, {
+	    key: 'componentWillReceiveProps',
+	    value: function componentWillReceiveProps(nextProps) {
 	
-	  setDate: function setDate(date, isDayView) {
-	    if (this.checkIfDateDisabled(date)) return;
-	
-	    var calendarClosed = this.props.closeOnSelect && isDayView;
-	
-	    this.setState({
-	      date: date,
-	      inputValue: date.format(this.state.format),
-	      isVisible: calendarClosed ? !this.state.isVisible : this.state.isVisible
-	    });
-	
-	    if (calendarClosed && this.props.onChangeAndBlur) {
-	      this.props.onChangeAndBlur(date.format(this.state.computableFormat));
-	    } else if (this.props.onChange) {
-	      this.props.onChange(date.format(this.state.computableFormat));
-	    }
-	  },
-	
-	  checkIfDateDisabled: function checkIfDateDisabled(date) {
-	    return date && this.state.minDate && date.isBefore(this.state.minDate, 'day') || date && this.state.maxDate && date.isAfter(this.state.maxDate, 'day');
-	  },
-	
-	  nextView: function nextView() {
-	    if (this.checkIfDateDisabled(this.state.date)) return;
-	    this.setState({ currentView: ++this.state.currentView });
-	  },
-	
-	  prevView: function prevView(date) {
-	    var newDate = date;
-	    if (this.state.minDate && date.isBefore(this.state.minDate, 'day')) {
-	      newDate = this.state.minDate.clone();
-	    }
-	
-	    if (this.state.maxDate && date.isAfter(this.state.maxDate, 'day')) {
-	      newDate = this.state.maxDate.clone();
-	    }
-	
-	    if (this.state.currentView === this.state.minView) {
+	      var date = nextProps.date ? (0, _moment2['default'])(_util2['default'].toDate(nextProps.date)) : null;
+	      var inputValue = date && date.isValid() ? date.format(this.state.format) : nextProps.date;
 	      this.setState({
-	        date: newDate,
-	        inputValue: date.format(this.state.format),
-	        isVisible: false
-	      });
-	      if (this.props.onChange) {
-	        this.props.onChange(date.format(this.state.computableFormat));
-	      }
-	    } else {
-	      this.setState({
-	        date: date,
-	        currentView: --this.state.currentView
+	        date: date ? date : this.state.date,
+	        inputValue: date ? inputValue : null
 	      });
 	    }
-	  },
+	  }, {
+	    key: 'componentWillUnmount',
+	    value: function componentWillUnmount() {
+	      document.removeEventListener('click', this.documentClick);
+	    }
+	  }, {
+	    key: 'checkIfDateDisabled',
+	    value: function checkIfDateDisabled(date) {
+	      return date && this.state.minDate && date.isBefore(this.state.minDate, 'day') || date && this.state.maxDate && date.isAfter(this.state.maxDate, 'day');
+	    }
+	  }, {
+	    key: 'setVisibility',
+	    value: function setVisibility(val) {
+	      var value = val !== undefined ? val : !this.state.isVisible;
+	      var eventMethod = value ? 'addEventListener' : 'removeEventListener';
 	
-	  changeDate: function changeDate(e) {
-	    this.setState({ inputValue: e.target.value });
-	  },
+	      document[eventMethod]('keydown', this.keyDown);
 	
-	  inputBlur: function inputBlur(e) {
-	    var newDate = null;
-	    var computableDate = null;
-	    var date = this.state.inputValue;
-	    var format = this.state.format;
-	    var parsingFormat = this.state.parsingFormat;
+	      if (this.state.isVisible !== value && !this.props.disabled) {
+	        this.setState({ isVisible: value });
+	      }
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	      // its ok for this.state.date to be null, but we should never
+	      // pass null for the date into the calendar pop up, as we want
+	      // it to just start on todays date if there is no date set
+	      var calendarDate = this.state.date && this.state.date.isValid() ? this.state.date : (0, _moment2['default'])();
+	      var view = undefined;
 	
-	    if (date) {
-	      // format, with strict parsing true, so we catch bad dates
-	      newDate = (0, _moment2['default'])(date, parsingFormat, true);
-	      // if the new date didn't match our format, see if the native
-	      // js date can parse it
-	      if (!newDate.isValid() && !this.props.strictDateParsing) {
-	        var d = new Date(date);
-	        // if native js cannot parse, just make a new date
-	        if (isNaN(d.getTime())) {
-	          d = new Date();
-	        }
-	        newDate = (0, _moment2['default'])(d);
+	      switch (this.state.currentView) {
+	        case 0:
+	          view = _react2['default'].createElement(_dayView2['default'], {
+	            date: calendarDate,
+	            nextView: this.nextView,
+	            maxDate: this.state.maxDate,
+	            minDate: this.state.minDate,
+	            setDate: this.setDate
+	          });
+	          break;
+	        case 1:
+	          view = _react2['default'].createElement(_monthView2['default'], {
+	            date: calendarDate,
+	            nextView: this.nextView,
+	            maxDate: this.state.maxDate,
+	            minDate: this.state.minDate,
+	            prevView: this.prevView,
+	            setDate: this.setDate
+	          });
+	          break;
+	        case 2:
+	          view = _react2['default'].createElement(_yearView2['default'], {
+	            date: calendarDate,
+	            maxDate: this.state.maxDate,
+	            minDate: this.state.minDate,
+	            prevView: this.prevView,
+	            setDate: this.setDate
+	          });
+	          break;
+	        default:
+	          view = _react2['default'].createElement(_dayView2['default'], {
+	            date: calendarDate,
+	            nextView: this.nextView,
+	            maxDate: this.state.maxDate,
+	            minDate: this.state.minDate,
+	            setDate: this.setDate
+	          });
 	      }
 	
-	      computableDate = newDate.format(this.state.computableFormat);
-	    }
+	      var todayText = this.props.todayText || (_moment2['default'].locale() === 'de' ? 'Heute' : 'Today');
+	      var calendarClass = (0, _classnames2['default'])({
+	        'input-calendar-wrapper': true,
+	        'icon-hidden': this.props.hideIcon
+	      });
 	
-	    this.setState({
-	      date: newDate,
-	      inputValue: newDate ? newDate.format(format) : null
-	    });
-	
-	    if (this.props.onChange) {
-	      this.props.onChange(computableDate);
-	    }
-	
-	    if (this.props.onBlur) {
-	      this.props.onBlur(e, computableDate);
-	    }
-	  },
-	
-	  documentClick: function documentClick() {
-	    if (!this.isCalendar) {
-	      this.setVisibility(false);
-	    }
-	    this.isCalendar = false;
-	  },
-	
-	  calendarClick: function calendarClick() {
-	    this.isCalendar = true;
-	  },
-	
-	  todayClick: function todayClick() {
-	    var today = (0, _moment2['default'])().startOf('day');
-	
-	    if (this.checkIfDateDisabled(today)) return;
-	
-	    this.setState({
-	      date: today,
-	      inputValue: today.format(this.state.format),
-	      currentView: this.state.minView
-	    });
-	
-	    if (this.props.onChange) {
-	      this.props.onChange(today.format(this.state.computableFormat));
-	    }
-	  },
-	
-	  toggleClick: function toggleClick() {
-	    this.isCalendar = true;
-	    this.setVisibility();
-	  },
-	
-	  keyDown: function keyDown(e) {
-	    _util2['default'].keyDownActions.call(this, e.keyCode);
-	  },
-	
-	  isCalendar: false,
-	
-	  render: function render() {
-	    // its ok for this.state.date to be null, but we should never
-	    // pass null for the date into the calendar pop up, as we want
-	    // it to just start on todays date if there is no date set
-	    var calendarDate = this.state.date && this.state.date.isValid() ? this.state.date : (0, _moment2['default'])();
-	    var view = undefined;
-	
-	    switch (this.state.currentView) {
-	      case 0:
-	        view = _react2['default'].createElement(_dayView2['default'], {
-	          date: calendarDate,
-	          nextView: this.nextView,
-	          maxDate: this.state.maxDate,
-	          minDate: this.state.minDate,
-	          setDate: this.setDate
-	        });
-	        break;
-	      case 1:
-	        view = _react2['default'].createElement(_monthView2['default'], {
-	          date: calendarDate,
-	          nextView: this.nextView,
-	          maxDate: this.state.maxDate,
-	          minDate: this.state.minDate,
-	          prevView: this.prevView,
-	          setDate: this.setDate
-	        });
-	        break;
-	      case 2:
-	        view = _react2['default'].createElement(_yearView2['default'], {
-	          date: calendarDate,
-	          maxDate: this.state.maxDate,
-	          minDate: this.state.minDate,
-	          prevView: this.prevView,
-	          setDate: this.setDate
-	        });
-	        break;
-	      default:
-	        view = _react2['default'].createElement(_dayView2['default'], {
-	          date: calendarDate,
-	          nextView: this.nextView,
-	          maxDate: this.state.maxDate,
-	          minDate: this.state.minDate,
-	          setDate: this.setDate
-	        });
-	    }
-	
-	    var todayText = this.props.todayText || (_moment2['default'].locale() === 'de' ? 'Heute' : 'Today');
-	    var calendarClass = (0, _classnames2['default'])({
-	      'input-calendar-wrapper': true,
-	      'icon-hidden': this.props.hideIcon
-	    });
-	
-	    var calendar = !this.state.isVisible ? '' : _react2['default'].createElement(
-	      'div',
-	      { className: calendarClass, onClick: this.calendarClick },
-	      view,
-	      _react2['default'].createElement(
-	        'span',
-	        {
-	          className: 'today-btn' + (this.checkIfDateDisabled((0, _moment2['default'])().startOf('day')) ? ' disabled' : ''),
-	          onClick: this.todayClick
-	        },
-	        todayText
-	      )
-	    );
-	
-	    var readOnly = false;
-	
-	    if (this.props.hideTouchKeyboard) {
-	      // do not break server side rendering:
-	      try {
-	        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-	          readOnly = true;
-	        }
-	      } catch (e) {}
-	    }
-	
-	    var calendarIcon = undefined;
-	    if (this.props.customIcon == null) {
-	      // Do not show calendar icon if hideIcon is true
-	      calendarIcon = this.props.hideIcon ? '' : _react2['default'].createElement(
-	        'span',
-	        { className: 'icon-wrapper calendar-icon', onClick: this.toggleClick },
+	      var calendar = !this.state.isVisible ? '' : _react2['default'].createElement(
+	        'div',
+	        { className: calendarClass, onClick: this.calendarClick },
+	        view,
 	        _react2['default'].createElement(
-	          'svg',
-	          { width: '16', height: '16', viewBox: '0 0 16 16' },
-	          _react2['default'].createElement('path', { d: 'M5 6h2v2h-2zM8 6h2v2h-2zM11 6h2v2h-2zM2 12h2v2h-2zM5 12h2v2h-2zM8 12h2v2h-2zM5 9h2v2h-2zM8 9h2v2h-2zM11 9h2v2h-2zM2 9h2v2h-2zM13 0v1h-2v-1h-7v1h-2v-1h-2v16h15v-16h-2zM14 15h-13v-11h13v11z'
-	          })
+	          'span',
+	          {
+	            className: 'today-btn' + (this.checkIfDateDisabled((0, _moment2['default'])().startOf('day')) ? ' disabled' : ''),
+	            onClick: this.todayClick },
+	          todayText
 	        )
 	      );
-	    } else {
-	      calendarIcon = _react2['default'].createElement('span', {
-	        className: (0, _classnames2['default'])('icon-wrapper', 'calendar-icon', this.props.customIcon),
-	        onClick: this.toggleClick
-	      });
+	
+	      var readOnly = false;
+	
+	      if (this.props.hideTouchKeyboard) {
+	        // do not break server side rendering:
+	        try {
+	          if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+	            readOnly = true;
+	          }
+	        } catch (e) {
+	          console.warn(e); //eslint-disable-line
+	        }
+	      }
+	
+	      var calendarIcon = undefined;
+	      if (this.props.customIcon == null) {
+	        // Do not show calendar icon if hideIcon is true
+	        calendarIcon = this.props.hideIcon || this.props.disabled ? '' : _react2['default'].createElement(
+	          'span',
+	          { className: 'icon-wrapper calendar-icon', onClick: this.toggleClick },
+	          _react2['default'].createElement(
+	            'svg',
+	            { width: '16', height: '16', viewBox: '0 0 16 16' },
+	            _react2['default'].createElement('path', { d: 'M5 6h2v2h-2zM8 6h2v2h-2zM11 6h2v2h-2zM2 12h2v2h-2zM5 12h2v2h-2zM8 12h2v2h-2zM5 9h2v2h-2zM8 9h2v2h-2zM11 9h2v2h-2zM2 9h2v2h-2zM13 0v1h-2v-1h-7v1h-2v-1h-2v16h15v-16h-2zM14 15h-13v-11h13v11z'
+	            })
+	          )
+	        );
+	      } else {
+	        calendarIcon = _react2['default'].createElement('span', {
+	          className: (0, _classnames2['default'])('icon-wrapper', 'calendar-icon', this.props.customIcon),
+	          onClick: this.toggleClick
+	        });
+	      }
+	
+	      var inputClass = this.props.inputFieldClass || 'input-calendar-field';
+	
+	      return _react2['default'].createElement(
+	        'div',
+	        { className: 'input-calendar' },
+	        _react2['default'].createElement('input', {
+	          name: this.props.inputName,
+	          className: inputClass,
+	          id: this.props.inputFieldId,
+	          onBlur: this.inputBlur,
+	          onChange: this.changeDate,
+	          onFocus: this.props.openOnInputFocus ? this.toggleClick : '',
+	          placeholder: this.props.placeholder,
+	          readOnly: readOnly,
+	          disabled: this.props.disabled,
+	          type: 'text',
+	          value: this.state.inputValue
+	        }),
+	        calendarIcon,
+	        calendar
+	      );
 	    }
+	  }]);
 	
-	    var inputClass = this.props.inputFieldClass || 'input-calendar-field';
+	  return Calendar;
+	})(_react2['default'].Component);
 	
-	    return _react2['default'].createElement(
-	      'div',
-	      { className: 'input-calendar' },
-	      _react2['default'].createElement('input', {
-	        name: this.props.inputName,
-	        className: inputClass,
-	        id: this.props.inputFieldId,
-	        onBlur: this.inputBlur,
-	        onChange: this.changeDate,
-	        onFocus: this.props.openOnInputFocus ? this.toggleClick : '',
-	        placeholder: this.props.placeholder,
-	        readOnly: readOnly,
-	        type: 'text',
-	        value: this.state.inputValue
-	      }),
-	      calendarIcon,
-	      calendar
-	    );
-	  }
-	});
+	Calendar.propTypes = {
+	  closeOnSelect: _react2['default'].PropTypes.bool,
+	  computableFormat: _react2['default'].PropTypes.string,
+	  strictDateParsing: _react2['default'].PropTypes.bool,
+	  parsingFormat: _react2['default'].PropTypes.oneOfType([_react2['default'].PropTypes.string, _react2['default'].PropTypes.arrayOf(_react2['default'].PropTypes.string)]),
+	  date: _react2['default'].PropTypes.any,
+	  minDate: _react2['default'].PropTypes.any,
+	  maxDate: _react2['default'].PropTypes.any,
+	  format: _react2['default'].PropTypes.string,
+	  inputName: _react2['default'].PropTypes.string,
+	  inputFieldId: _react2['default'].PropTypes.string,
+	  inputFieldClass: _react2['default'].PropTypes.string,
+	  minView: _react2['default'].PropTypes.number,
+	  onBlur: _react2['default'].PropTypes.func,
+	  onChange: _react2['default'].PropTypes.func,
+	  onChangeAndBlur: _react2['default'].PropTypes.func,
+	  openOnInputFocus: _react2['default'].PropTypes.bool,
+	  placeholder: _react2['default'].PropTypes.string,
+	  hideTouchKeyboard: _react2['default'].PropTypes.bool,
+	  hideIcon: _react2['default'].PropTypes.bool,
+	  customIcon: _react2['default'].PropTypes.string,
+	  todayText: _react2['default'].PropTypes.string,
+	  disabled: _react2['default'].PropTypes.bool
+	};
 	
 	exports['default'] = Calendar;
 	module.exports = exports['default'];

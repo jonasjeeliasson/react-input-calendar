@@ -43,11 +43,11 @@ class Calendar extends React.Component {
 
   componentWillReceiveProps(nextProps) {
 
+    const date = nextProps.date ? moment(Util.toDate(nextProps.date)) : null
+    const inputValue = date && date.isValid() ? date.format(this.state.format) : nextProps.date
     this.setState({
-      date: nextProps.date ? moment(Util.toDate(nextProps.date)) : this.state.date,
-      inputValue: nextProps.date
-        ? moment(Util.toDate(nextProps.date)).format(this.state.format) : null,
-        isVisible: nextProps.disabled === true
+      date: date ? date : this.state.date,
+      inputValue: date ? inputValue : null
     })
   }
 
@@ -148,14 +148,17 @@ class Calendar extends React.Component {
   setDate = (date, isDayView) => {
     if (this.checkIfDateDisabled(date)) return
 
+    const calendarClosed = this.props.closeOnSelect && isDayView
+
     this.setState({
       date,
       inputValue: date.format(this.state.format),
-      isVisible: this.props.closeOnSelect
-        && isDayView ? !this.state.isVisible : this.state.isVisible
+      isVisible: calendarClosed ? !this.state.isVisible : this.state.isVisible
     })
 
-    if (this.props.onChange) {
+    if (calendarClosed && this.props.onChangeAndBlur) {
+      this.props.onChangeAndBlur(date.format(this.state.computableFormat))
+    } else if (this.props.onChange) {
       this.props.onChange(date.format(this.state.computableFormat))
     }
   }
@@ -200,7 +203,7 @@ class Calendar extends React.Component {
     // its ok for this.state.date to be null, but we should never
     // pass null for the date into the calendar pop up, as we want
     // it to just start on todays date if there is no date set
-    let calendarDate = this.state.date || moment()
+    let calendarDate = this.state.date && this.state.date.isValid() ? this.state.date : moment()
     let view
 
     switch (this.state.currentView) {
@@ -338,6 +341,7 @@ Calendar.propTypes = {
   minView: React.PropTypes.number,
   onBlur: React.PropTypes.func,
   onChange: React.PropTypes.func,
+  onChangeAndBlur: React.PropTypes.func,
   openOnInputFocus: React.PropTypes.bool,
   placeholder: React.PropTypes.string,
   hideTouchKeyboard: React.PropTypes.bool,
