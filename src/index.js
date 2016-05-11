@@ -152,7 +152,6 @@ class Calendar extends React.Component {
 
     this.setState({
       date,
-      inputValue: date.format(this.state.format),
       isVisible: calendarClosed ? !this.state.isVisible : this.state.isVisible
     })
 
@@ -185,7 +184,6 @@ class Calendar extends React.Component {
 
     this.setState({
       date: today,
-      inputValue: today.format(this.state.format),
       currentView: this.state.minView
     })
 

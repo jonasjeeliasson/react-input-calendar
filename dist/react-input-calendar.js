@@ -203,7 +203,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	      _this.setState({
 	        date: date,
-	        inputValue: date.format(_this.state.format),
 	        isVisible: calendarClosed ? !_this.state.isVisible : _this.state.isVisible
 	      });
 	
@@ -225,7 +224,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	      _this.setState({
 	        date: today,
-	        inputValue: today.format(_this.state.format),
 	        currentView: _this.state.minView
 	      });
 	
