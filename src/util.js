@@ -35,7 +35,8 @@ export default {
     return date instanceof Date ? date : new Date(date)
   },
 
-  keyDownActions(code) {
+  keyDownActions(event) {
+    const code = event.keyCode
     const _viewHelper = _keyDownViewHelper[this.state.currentView]
     const unit = _viewHelper.unit
 
@@ -47,9 +48,11 @@ export default {
         this.setDate(this.state.date.add(1, unit))
         break
       case KEYS.up:
+        event.preventDefault()
         this.setDate(this.state.date.subtract(_viewHelper.upDown, unit))
         break
       case KEYS.down:
+        event.preventDefault()
         this.setDate(this.state.date.add(_viewHelper.upDown, unit))
         break
       case KEYS.enter:
@@ -57,7 +60,7 @@ export default {
           this.prevView(this.state.date)
         }
         if (_viewHelper.exit) {
-          this.setState({ isVisible: false })
+          this.setDate(this.state.date, true)
         }
         break
       case KEYS.esc:

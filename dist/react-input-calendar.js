@@ -161,7 +161,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	
 	    this.keyDown = function (e) {
-	      _util2['default'].keyDownActions.call(_this, e.keyCode);
+	      _util2['default'].keyDownActions.call(_this, e);
 	    };
 	
 	    this.nextView = function () {
@@ -1540,7 +1540,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return date instanceof Date ? date : new Date(date);
 	  },
 	
-	  keyDownActions: function keyDownActions(code) {
+	  keyDownActions: function keyDownActions(event) {
+	    var code = event.keyCode;
 	    var _viewHelper = _keyDownViewHelper[this.state.currentView];
 	    var unit = _viewHelper.unit;
 	
@@ -1552,9 +1553,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.setDate(this.state.date.add(1, unit));
 	        break;
 	      case KEYS.up:
+	        event.preventDefault();
 	        this.setDate(this.state.date.subtract(_viewHelper.upDown, unit));
 	        break;
 	      case KEYS.down:
+	        event.preventDefault();
 	        this.setDate(this.state.date.add(_viewHelper.upDown, unit));
 	        break;
 	      case KEYS.enter:
@@ -1562,7 +1565,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          this.prevView(this.state.date);
 	        }
 	        if (_viewHelper.exit) {
-	          this.setState({ isVisible: false });
+	          this.setDate(this.state.date, true);
 	        }
 	        break;
 	      case KEYS.esc:

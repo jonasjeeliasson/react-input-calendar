@@ -110,7 +110,7 @@ class Calendar extends React.Component {
   }
 
   keyDown = e => {
-    Util.keyDownActions.call(this, e.keyCode)
+    Util.keyDownActions.call(this, e)
   }
 
   nextView = () => {
